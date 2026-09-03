@@ -645,7 +645,11 @@ function fallbackPrompt(s: Segment, action?: string): string {
 const TEXT_TRIGGERS: [RegExp, string][] = [
   [/\b(sign(board|age)?s?|street sign|shop sign)\b\s*(that\s+)?(reads?|saying|says)?[^,.]*/gi, "weathered wall"],
   [/\b(poster|posters|billboard|billboards|banner|banners|placard|flyer|leaflet|brochure)\b/gi, "bare wall"],
-  [/\b(newspaper|newspapers|magazine|magazines|letter|letters|envelope|note|notes|notebook|diary|book page|pages of a book|document|documents|contract|receipt|ticket|label|labels|tag|tags)\b/gi, "worn paper object"],
+  // Paper props only when they are the object itself. A trailing noun means the
+  // word is an adjective for real furniture ("ticket machine", "note board"),
+  // which must be left intact — rewriting it produced nonsense like
+  // "a small worn paper object machine on the wall".
+  [/\b(newspaper|newspapers|magazine|magazines|letter|letters|envelope|note|notes|notebook|diary|book page|pages of a book|document|documents|contract|receipt|ticket|label|labels|tag|tags)\b(?!\s+(machine|machines|counter|booth|stand|window|holder|dispenser|rack|box|board|shelf|kiosk|gate|barrier|office|hall|desk))/gi, "worn paper object"],
   [/\b(text|texts|writing|written words?|words?\s+written|caption|captions|subtitle|subtitles|title card|handwriting|calligraphy|graffiti|inscription|slogan|logo|logos|brand name|watermark|number plate|license plate|numberplate)\b/gi, ""],
   [/\b(that|which)\s+(reads?|says?)\b[^,.]*/gi, ""],
   [/\breading\s+(a|an|the)\s+\w+/gi, "holding an object"],
