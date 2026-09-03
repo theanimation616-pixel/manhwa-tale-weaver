@@ -462,7 +462,7 @@ export async function writePrompts(
 
   // One timestamp = one image: the returned array is always exactly as long as
   // `segments`, in the same order, with a fallback prompt rather than a hole.
-  return segments.map((s, i) => {
+  const built = segments.map((s, i) => {
     const v = arr[i];
     const text = usable(v) ? (v as string).trim() : null;
     const action = actions[i + 1];
@@ -476,6 +476,10 @@ export async function writePrompts(
     // analysed action back so the image still shows what the script line says.
     return sanitizePrompt(enforceBeatAction(cast, action));
   });
+
+  // Final pass: chain each panel to the one before it so the render is a
+  // continuation of the previous image rather than a fresh interpretation.
+  return chainContinuity(built, locations);
 }
 
 /**
