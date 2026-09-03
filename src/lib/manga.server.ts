@@ -38,11 +38,12 @@ export const TONE_LOCK =
  * rendered literally (walls of speech bubbles and signage). So the guards are
  * now short and phrased POSITIVELY wherever possible.
  */
-export const NO_TEXT_GUARD = "completely free of any text, lettering or signage";
+export const NO_TEXT_GUARD =
+  "a pure wordless artwork, completely free of any text, lettering, signage, speech balloons or captions";
 
 /** Single-image guard. Deliberately short; see NO_TEXT_GUARD note above. */
 export const SINGLE_PANEL_GUARD =
-  "one single full-bleed illustration of this one moment, one continuous scene, fully drawn and detailed";
+  "one single full-bleed illustration of this one moment, one continuous scene edge to edge, fully drawn and detailed";
 
 /** Added only when the scene has no people in it. */
 export const NO_PEOPLE_GUARD =
