@@ -15,7 +15,7 @@ const PIXAZO_URL = "https://gateway.pixazo.ai/flux-1-schnell/v1/getData";
  * applied: the lighting is whatever the script line says it is.
  */
 export const STYLE =
-  "professional full-colour Korean webtoon manhwa page illustration, masterpiece quality, " +
+  "professional full-colour Korean webtoon manhwa art style, masterpiece quality, " +
   "crisp clean confident ink outlines, flat cel shading with soft gradient blush and glossy hair highlights, " +
   "expressive detailed faces with large finely drawn eyes, " +
   "extremely detailed fully rendered background with every piece of architecture, furniture, prop and texture drawn out, " +
