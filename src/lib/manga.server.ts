@@ -590,10 +590,41 @@ function mentionsLocation(prompt: string, location: string): boolean {
   return hits / words.length >= 0.5;
 }
 
+/**
+ * Location lock. The panel ALWAYS opens with the analysed place: Flux weights
+ * the first tokens hardest, and the old "only when missing" behaviour let whole
+ * runs drift into an unrelated kitchen while the script was in a cave.
+ */
 export function enforceLocation(prompt: string, location?: string): string {
   if (!location) return prompt;
-  if (mentionsLocation(prompt, location)) return prompt;
-  return `In ${location}: ${prompt} The scene takes place in ${location}, and nowhere else.`;
+  const body = mentionsLocation(prompt, location)
+    ? prompt
+    : `${prompt} The scene takes place in ${location}, and nowhere else.`;
+  const opener = new RegExp(`^in ${location.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+  if (opener.test(body)) return body;
+  return `In ${location}: ${body}`;
+}
+
+/**
+ * Panel-to-panel continuity. Consecutive panels are consecutive moments of one
+ * continuous shot, so when the analysed location has not changed the render is
+ * told explicitly that everything but the camera stays identical.
+ */
+export function chainContinuity(prompts: string[], locations: Record<number, string>): string[] {
+  return prompts.map((p, i) => {
+    if (i === 0) return p;
+    const here = locations[i + 1];
+    const before = locations[i];
+    const samePlace = !here || !before || here.toLowerCase() === before.toLowerCase();
+    if (!samePlace) {
+      return `${p} This is the very next moment of the same continuous story, drawn in the identical art style as the previous illustration; the characters keep exactly the same faces, hair, clothing and colours.`;
+    }
+    return (
+      `${p} Direct visual continuation of the immediately previous illustration: the same ${here ?? "place"}, ` +
+      `the same time of day, the same weather, the same furniture and props in the same positions, ` +
+      `the same characters with identical faces, hair and clothing — only the camera angle, the pose and the expression change.`
+    );
+  });
 }
 
 
