@@ -878,7 +878,7 @@ export function composeImagePrompt(prompt: string, bible?: string): string {
   // the webtoon look can never be truncated away, then the detailed scene,
   // then the identity lock, then the (short, positively phrased) guards.
   return (
-    `Full-colour webtoon manhwa page illustration, highly detailed: ${fixed}. ` +
+    `Full-colour webtoon manhwa style illustration, highly detailed: ${fixed}. ` +
     `${lock ? lock + " " : ""}${TONE_LOCK}. ${STYLE}, ${NO_TEXT_GUARD}. ` +
     `${peopled ? CAST_GUARD : NO_PEOPLE_GUARD}. ${SINGLE_PANEL_GUARD}. ` +
     `16:9 widescreen cinematic framing.`
