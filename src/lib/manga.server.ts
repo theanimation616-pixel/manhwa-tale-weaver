@@ -696,6 +696,7 @@ export function sanitizePrompt(p: string): string {
       "full colour",
     );
   for (const [re, to] of TEXT_TRIGGERS) out = out.replace(re, to);
+  for (const [re, to] of METAPHOR_TRIGGERS) out = out.replace(re, to);
   for (const [re, to] of DARK_TRIGGERS) out = out.replace(re, to);
 
   return out
