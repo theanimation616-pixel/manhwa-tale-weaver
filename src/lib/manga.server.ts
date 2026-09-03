@@ -646,9 +646,27 @@ const TEXT_TRIGGERS: [RegExp, string][] = [
   [/\b(that|which)\s+(reads?|says?)\b[^,.]*/gi, ""],
   [/\breading\s+(a|an|the)\s+\w+/gi, "holding an object"],
   [/\b(screen|display|monitor|phone screen|laptop screen)\s+(showing|displaying|with)\b[^,.]*/gi, "dark glowing screen"],
+  // Balloons/lettering furniture: naming them at all makes Flux draw them.
+  [/\b(speech|thought|dialogue|word)\s*(bubble|balloon)s?\b/gi, ""],
+  [/\b(comic|manga|manhwa|webtoon)\s+(page|panel|panels|strip|layout|gutters?)\b/gi, "illustration"],
+  [/\b(says?|saying|shouts?|shouting|whispers?|whispering|yells?|screams?|mutters?|exclaims?)\s*[,:]?\s*["“'][^"”']{0,160}["”']/gi, ""],
   [/"[^"]{0,120}"/g, ""],
   [/'[^']{2,120}'/g, ""],
   [/“[^”]{0,120}”/g, ""],
+];
+
+/**
+ * Metaphor scrubber. "his lungs burned with fire" was rendered LITERALLY —
+ * flames erupting from a character's chest. Figurative body/soul imagery is
+ * rewritten into the visible human reaction instead.
+ */
+const METAPHOR_TRIGGERS: [RegExp, string][] = [
+  [/\b(lungs?|chest|throat|veins?|blood|body|skin|heart|soul|mind|nerves?)\s+(burning|on fire|aflame|ablaze|engulfed in flames?|filled with fire|searing with fire)\b/gi, "face contorted in pain, hand clutching the chest"],
+  [/\b(fire|flames?|embers?|lightning|electricity|energy)\s+(erupting|bursting|pouring|radiating|spreading)\s+(from|out of|through)\s+(his|her|their|the)\s+(chest|body|lungs?|throat|skin|veins?|mouth|eyes)\b/gi, "body tensed, breath sharp, expression strained"],
+  [/\b(glowing|luminous|visible|exposed|raw|pulsing)\s+(organs?|flesh|muscle|lungs?|veins?|anatomy|innards?)\b/gi, "strained expression"],
+  [/\b(soul|spirit|consciousness|essence)\s+(torn|ripped|wrenched|extracted|pulled|dragged)\s+\w*\s*(from|out of)[^,.]*/gi, "whole body convulsing, eyes wide with shock"],
+  [/\b(x-?ray|anatomical cutaway|see-through body|transparent body|internal organs? view)\b/gi, "normal opaque body"],
+  [/\b(surreal|symbolic|abstract|metaphorical|dreamlike|otherworldly)\s+(imagery|vision|representation|overlay|effect)s?\b/gi, "grounded realistic depiction"],
 ];
 
 /**
