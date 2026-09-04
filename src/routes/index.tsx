@@ -133,6 +133,7 @@ function Index() {
   const fileRef = useRef<HTMLInputElement>(null);
   const shotsRef = useRef<Shot[]>([]);
   const cancelRef = useRef(false);
+  const [retrying, setRetrying] = useState<number[]>([]);
 
 
   shotsRef.current = shots;
