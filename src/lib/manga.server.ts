@@ -53,6 +53,14 @@ export const NO_PEOPLE_GUARD =
 export const CAST_GUARD =
   "only the people described above are present, each drawn once, each with the exact gender stated for them, male characters unmistakably male and female characters unmistakably female, never swapped or blended";
 
+/**
+ * Anatomy guard. Panels came back with two figures sharing one shirt and fused
+ * torsos, so every body is now explicitly stated to be whole and separate.
+ */
+export const ANATOMY_GUARD =
+  "anatomically correct bodies, one head, two arms and two legs per person, every figure a complete separate body with its own clothing, clearly spaced apart, never fused, merged, overlapping into one another or duplicated";
+
+
 
 export async function zaiChat(
   messages: { role: string; content: string }[],
