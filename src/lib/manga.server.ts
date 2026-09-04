@@ -915,9 +915,10 @@ export function composeImagePrompt(prompt: string, bible?: string): string {
   return (
     `Full-colour webtoon manhwa style illustration, highly detailed: ${fixed}. ` +
     `${lock ? lock + " " : ""}${TONE_LOCK}. ${STYLE}, ${NO_TEXT_GUARD}. ` +
-    `${peopled ? CAST_GUARD : NO_PEOPLE_GUARD}. ${SINGLE_PANEL_GUARD}. ` +
+    `${peopled ? `${CAST_GUARD}. ${ANATOMY_GUARD}` : NO_PEOPLE_GUARD}. ${SINGLE_PANEL_GUARD}. ` +
     `16:9 widescreen cinematic framing.`
   );
+
 }
 
 /**
