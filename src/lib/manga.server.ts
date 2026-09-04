@@ -574,11 +574,21 @@ export function enforceCast(prompt: string, who?: string): string {
     const head = key.split(/\s+/)[0] ?? key;
     return !p.includes(key) && !p.includes(head);
   });
-  if (missing.length === 0) return prompt;
-  return `${prompt} The only people in frame are ${names.join(" and ")}; ${missing.join(
-    " and ",
-  )} must be present and no other character appears.`;
+  // HEAD COUNT (critical): the render kept inventing extra bystanders — a solo
+  // "he was lying on stone" beat came back with two or three figures. The exact
+  // number of humans allowed in frame is now stated explicitly every time.
+  const n = names.length;
+  const count =
+    n === 1
+      ? `Exactly one person is in frame: ${names[0]}, completely alone, a solo shot with no other person, no bystander, no second figure and no reflection of another person anywhere in the image.`
+      : `Exactly ${n} people are in frame — ${names.join(" and ")} — and nobody else; each of them is drawn once, as one separate whole body, never merged or duplicated.`;
+  const add =
+    missing.length === 0
+      ? ""
+      : ` ${missing.join(" and ")} must be present.`;
+  return `${prompt} ${count}${add}`;
 }
+
 
 
 /** True when the prompt already names the location (or most of its words). */
