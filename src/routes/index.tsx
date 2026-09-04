@@ -405,7 +405,7 @@ function Index() {
                     }
                   }
                   if (url && !(await isBlankImageUrl(url))) {
-                    record(r.index, { url, status: "done", error: undefined });
+                    record(r.index, { url, prompt, status: "done", error: undefined });
                   } else {
                     record(r.index, { status: "error", error: "blank image" });
                   }
