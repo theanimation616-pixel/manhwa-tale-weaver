@@ -611,13 +611,21 @@ function mentionsLocation(prompt: string, location: string): boolean {
  */
 export function enforceLocation(prompt: string, location?: string): string {
   if (!location) return prompt;
+  // Location EXCLUSIVITY: renders were blending places — wooden cabinets, vases
+  // and kitchen shelves appearing inside a rock cave. The whole environment must
+  // belong to this one place, so the exclusion is stated on every panel.
+  const only =
+    ` The entire environment is ${location} and nothing else: every wall, floor, ceiling, ` +
+    `piece of furniture, prop and texture belongs to ${location}; no room, building, furniture ` +
+    `or scenery from any other place appears anywhere in the frame.`;
   const body = mentionsLocation(prompt, location)
-    ? prompt
-    : `${prompt} The scene takes place in ${location}, and nowhere else.`;
+    ? `${prompt}${only}`
+    : `${prompt} The scene takes place in ${location}, and nowhere else.${only}`;
   const opener = new RegExp(`^in ${location.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
   if (opener.test(body)) return body;
   return `In ${location}: ${body}`;
 }
+
 
 /**
  * Panel-to-panel continuity. Consecutive panels are consecutive moments of one
