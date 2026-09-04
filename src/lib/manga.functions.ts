@@ -1,7 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { parseScript } from "./script";
-import { buildCharacterBible, writePrompts, generateImage, analyzeChunk } from "./manga.server";
+import {
+  buildCharacterBible,
+  writePrompts,
+  generateImage,
+  generateCheckedImage,
+  analyzeChunk,
+} from "./manga.server";
 
 export const analyzeScript = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ script: z.string().min(5) }).parse(d))
@@ -90,6 +96,9 @@ export const renderBatch = createServerFn({ method: "POST" })
               prompt: z.string().min(5),
               seed: z.number().int(),
               slot: z.number().int().min(0).default(0),
+              // the script line this panel illustrates — enables the
+              // post-render review + single rewrite/regenerate pass
+              line: z.string().max(2000).optional(),
             }),
           )
           .min(1)
@@ -101,12 +110,26 @@ export const renderBatch = createServerFn({ method: "POST" })
     const results = await Promise.all(
       data.jobs.map(async (j) => {
         try {
-          const url = await generateImage(j.prompt, j.seed, j.slot, data.bible);
-          return { index: j.index, url, error: null as string | null };
+          const out = await generateCheckedImage(
+            j.prompt,
+            j.seed,
+            j.slot,
+            data.bible,
+            j.line,
+          );
+          return {
+            index: j.index,
+            url: out.url,
+            prompt: out.prompt,
+            revised: out.revised,
+            error: null as string | null,
+          };
         } catch (e) {
           return {
             index: j.index,
             url: null as string | null,
+            prompt: j.prompt,
+            revised: false,
             error: e instanceof Error ? e.message : String(e),
           };
         }

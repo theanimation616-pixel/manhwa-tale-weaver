@@ -370,6 +370,7 @@ function Index() {
                   prompt: g.prompt,
                   seed: 1000 + g.seg.index,
                   slot: keyTick++,
+                  line: g.seg.text,
                 })),
               },
             });
@@ -380,8 +381,11 @@ function Index() {
                   // is re-rolled on a fresh seed and key so every timestamp
                   // ends up with a real image.
                   let url: string | null = r.url;
+                  // the review pass may have rewritten the prompt server-side
                   const prompt =
-                    group.find((g) => g.seg.index === r.index)?.prompt ?? "";
+                    r.prompt ??
+                    group.find((g) => g.seg.index === r.index)?.prompt ??
+                    "";
                   for (let attempt = 1; attempt <= 2; attempt++) {
                     if (!url || !(await isBlankImageUrl(url))) break;
                     url = null;
@@ -401,7 +405,7 @@ function Index() {
                     }
                   }
                   if (url && !(await isBlankImageUrl(url))) {
-                    record(r.index, { url, status: "done", error: undefined });
+                    record(r.index, { url, prompt, status: "done", error: undefined });
                   } else {
                     record(r.index, { status: "error", error: "blank image" });
                   }

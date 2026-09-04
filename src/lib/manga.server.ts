@@ -1022,3 +1022,70 @@ export async function generateImage(
   }
   throw new Error(`Image generation failed: ${lastErr}`);
 }
+
+/* ------------------------------------------------------------------ */
+/* Post-render review                                                  */
+/* ------------------------------------------------------------------ */
+
+const REVIEW_SYSTEM =
+  "You are a manhwa storyboard editor. You are given one script line and the image prompt that was rendered for it. " +
+  "Judge whether the rendered panel matches the line: correct setting, correct people (right count and gender), " +
+  "the action the line describes, no text/speech bubbles, no literal metaphors (no flames, glowing organs, x-ray bodies), " +
+  "and no contradiction with the character sheet. " +
+  'Reply with exactly "OK" when it matches. Otherwise reply with ONLY a corrected single-paragraph image prompt ' +
+  "(no preamble, no quotes, no explanation) that fixes the problem while keeping the same characters, location and continuity.";
+
+/**
+ * Re-checks a rendered panel's prompt against its script line. Returns a
+ * rewritten prompt when the panel does not match the line, otherwise null.
+ */
+export async function reviewPanel(
+  line: string,
+  prompt: string,
+  bible?: string,
+  slot = 0,
+): Promise<string | null> {
+  try {
+    const out = await zaiChat(
+      [
+        { role: "system", content: REVIEW_SYSTEM },
+        {
+          role: "user",
+          content:
+            (bible ? `CHARACTER SHEET:\n${bible}\n\n` : "") +
+            `SCRIPT LINE:\n${line}\n\nRENDERED PROMPT:\n${prompt}`,
+        },
+      ],
+      { temperature: 0.3, maxTokens: 600, attempts: 2, timeoutMs: 60_000, slot },
+    );
+    const text = stripFences(out).trim();
+    if (!text || /^ok\b/i.test(text) || text.length < 40) return null;
+    return sanitizePrompt(text.replace(/^["']|["']$/g, "").slice(0, 1200));
+  } catch {
+    // Review is best-effort: never fail a good panel because the check failed.
+    return null;
+  }
+}
+
+/**
+ * Renders a panel, re-checks it against the script line and, when the check
+ * finds a problem, rewrites the prompt and regenerates exactly once.
+ */
+export async function generateCheckedImage(
+  prompt: string,
+  seed: number,
+  slot = 0,
+  bible?: string,
+  line?: string,
+): Promise<{ url: string; prompt: string; revised: boolean }> {
+  const url = await generateImage(prompt, seed, slot, bible);
+  if (!line) return { url, prompt, revised: false };
+  const fixed = await reviewPanel(line, prompt, bible, slot);
+  if (!fixed) return { url, prompt, revised: false };
+  try {
+    const retry = await generateImage(fixed, seed + 4409, slot, bible);
+    return { url: retry, prompt: fixed, revised: true };
+  } catch {
+    return { url, prompt, revised: false };
+  }
+}
