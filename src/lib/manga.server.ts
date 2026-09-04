@@ -864,10 +864,15 @@ export function characterLock(prompt: string, bible?: string): string {
   if (!bible) return "";
   const entries = parseBible(bible);
   if (entries.length === 0) return "";
-  const matched = entries.filter((e) => new RegExp(`\\b${escapeRe(e.name)}\\b`, "i").test(prompt));
-  // Only lock characters actually present in this scene — never inject
-  // the whole cast into a prompt that doesn't mention them.
-  if (matched.length === 0) return "";
+  let matched = entries.filter((e) => new RegExp(`\\b${escapeRe(e.name)}\\b`, "i").test(prompt));
+  // Pronoun-only beats ("he was lying on the stone") named nobody, so no lock
+  // was applied at all and the protagonist's hair/face changed every panel.
+  // A peopled prompt with no named match falls back to the lead character.
+  if (matched.length === 0) {
+    if (!/\b(he|him|his|she|her|they|them|man|boy|woman|girl|person|figure)\b/i.test(prompt)) return "";
+    matched = entries.slice(0, 1);
+  }
+
   return (
     "Fixed character identity (gender and appearance must match exactly for every character, " +
     "never swapped, blended or changed between shots): " +
