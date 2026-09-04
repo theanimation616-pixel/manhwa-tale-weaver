@@ -370,6 +370,7 @@ function Index() {
                   prompt: g.prompt,
                   seed: 1000 + g.seg.index,
                   slot: keyTick++,
+                  line: g.seg.text,
                 })),
               },
             });
