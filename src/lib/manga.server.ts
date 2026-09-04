@@ -53,6 +53,14 @@ export const NO_PEOPLE_GUARD =
 export const CAST_GUARD =
   "only the people described above are present, each drawn once, each with the exact gender stated for them, male characters unmistakably male and female characters unmistakably female, never swapped or blended";
 
+/**
+ * Anatomy guard. Panels came back with two figures sharing one shirt and fused
+ * torsos, so every body is now explicitly stated to be whole and separate.
+ */
+export const ANATOMY_GUARD =
+  "anatomically correct bodies, one head, two arms and two legs per person, every figure a complete separate body with its own clothing, clearly spaced apart, never fused, merged, overlapping into one another or duplicated";
+
+
 
 export async function zaiChat(
   messages: { role: string; content: string }[],
@@ -574,11 +582,21 @@ export function enforceCast(prompt: string, who?: string): string {
     const head = key.split(/\s+/)[0] ?? key;
     return !p.includes(key) && !p.includes(head);
   });
-  if (missing.length === 0) return prompt;
-  return `${prompt} The only people in frame are ${names.join(" and ")}; ${missing.join(
-    " and ",
-  )} must be present and no other character appears.`;
+  // HEAD COUNT (critical): the render kept inventing extra bystanders — a solo
+  // "he was lying on stone" beat came back with two or three figures. The exact
+  // number of humans allowed in frame is now stated explicitly every time.
+  const n = names.length;
+  const count =
+    n === 1
+      ? `Exactly one person is in frame: ${names[0]}, completely alone, a solo shot with no other person, no bystander, no second figure and no reflection of another person anywhere in the image.`
+      : `Exactly ${n} people are in frame — ${names.join(" and ")} — and nobody else; each of them is drawn once, as one separate whole body, never merged or duplicated.`;
+  const add =
+    missing.length === 0
+      ? ""
+      : ` ${missing.join(" and ")} must be present.`;
+  return `${prompt} ${count}${add}`;
 }
+
 
 
 /** True when the prompt already names the location (or most of its words). */
@@ -601,13 +619,21 @@ function mentionsLocation(prompt: string, location: string): boolean {
  */
 export function enforceLocation(prompt: string, location?: string): string {
   if (!location) return prompt;
+  // Location EXCLUSIVITY: renders were blending places — wooden cabinets, vases
+  // and kitchen shelves appearing inside a rock cave. The whole environment must
+  // belong to this one place, so the exclusion is stated on every panel.
+  const only =
+    ` The entire environment is ${location} and nothing else: every wall, floor, ceiling, ` +
+    `piece of furniture, prop and texture belongs to ${location}; no room, building, furniture ` +
+    `or scenery from any other place appears anywhere in the frame.`;
   const body = mentionsLocation(prompt, location)
-    ? prompt
-    : `${prompt} The scene takes place in ${location}, and nowhere else.`;
+    ? `${prompt}${only}`
+    : `${prompt} The scene takes place in ${location}, and nowhere else.${only}`;
   const opener = new RegExp(`^in ${location.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
   if (opener.test(body)) return body;
   return `In ${location}: ${body}`;
 }
+
 
 /**
  * Panel-to-panel continuity. Consecutive panels are consecutive moments of one
@@ -838,10 +864,15 @@ export function characterLock(prompt: string, bible?: string): string {
   if (!bible) return "";
   const entries = parseBible(bible);
   if (entries.length === 0) return "";
-  const matched = entries.filter((e) => new RegExp(`\\b${escapeRe(e.name)}\\b`, "i").test(prompt));
-  // Only lock characters actually present in this scene — never inject
-  // the whole cast into a prompt that doesn't mention them.
-  if (matched.length === 0) return "";
+  let matched = entries.filter((e) => new RegExp(`\\b${escapeRe(e.name)}\\b`, "i").test(prompt));
+  // Pronoun-only beats ("he was lying on the stone") named nobody, so no lock
+  // was applied at all and the protagonist's hair/face changed every panel.
+  // A peopled prompt with no named match falls back to the lead character.
+  if (matched.length === 0) {
+    if (!/\b(he|him|his|she|her|they|them|man|boy|woman|girl|person|figure)\b/i.test(prompt)) return "";
+    matched = entries.slice(0, 1);
+  }
+
   return (
     "Fixed character identity (gender and appearance must match exactly for every character, " +
     "never swapped, blended or changed between shots): " +
@@ -884,9 +915,10 @@ export function composeImagePrompt(prompt: string, bible?: string): string {
   return (
     `Full-colour webtoon manhwa style illustration, highly detailed: ${fixed}. ` +
     `${lock ? lock + " " : ""}${TONE_LOCK}. ${STYLE}, ${NO_TEXT_GUARD}. ` +
-    `${peopled ? CAST_GUARD : NO_PEOPLE_GUARD}. ${SINGLE_PANEL_GUARD}. ` +
+    `${peopled ? `${CAST_GUARD}. ${ANATOMY_GUARD}` : NO_PEOPLE_GUARD}. ${SINGLE_PANEL_GUARD}. ` +
     `16:9 widescreen cinematic framing.`
   );
+
 }
 
 /**
