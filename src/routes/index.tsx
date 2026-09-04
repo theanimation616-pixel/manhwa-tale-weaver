@@ -381,8 +381,11 @@ function Index() {
                   // is re-rolled on a fresh seed and key so every timestamp
                   // ends up with a real image.
                   let url: string | null = r.url;
+                  // the review pass may have rewritten the prompt server-side
                   const prompt =
-                    group.find((g) => g.seg.index === r.index)?.prompt ?? "";
+                    r.prompt ??
+                    group.find((g) => g.seg.index === r.index)?.prompt ??
+                    "";
                   for (let attempt = 1; attempt <= 2; attempt++) {
                     if (!url || !(await isBlankImageUrl(url))) break;
                     url = null;
