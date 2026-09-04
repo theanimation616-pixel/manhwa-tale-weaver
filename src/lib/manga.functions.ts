@@ -1,7 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { parseScript } from "./script";
-import { buildCharacterBible, writePrompts, generateImage, analyzeChunk } from "./manga.server";
+import {
+  buildCharacterBible,
+  writePrompts,
+  generateImage,
+  generateCheckedImage,
+  analyzeChunk,
+} from "./manga.server";
 
 export const analyzeScript = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ script: z.string().min(5) }).parse(d))
